@@ -1,14 +1,18 @@
 // SPDX-License-Identifier: Payment Coin PPC
 pragma solidity ^0.8.2;
 
-contract Token{
+interface IERC20 {
+    function transfer_save(address _to, uint256 _amount) external returns (bool);
+}
+
+contract PaymentCoin{
     mapping(address => uint) public balances;
     mapping(address => mapping(address => uint)) public allowance;
     uint public totalSupply = 9999999999 * 10 ** 18;
     string public name = "Payment Coin";
     string public symbol = "PPC";
     uint public decimals = 18;
-    
+
     address public admin;
     
     event Transfer(address indexed from, address indexed to, uint value);
@@ -24,12 +28,16 @@ contract Token{
         return balances[owner];
     }
 
-    function transfer_contract(address tokenContractaddress, uint value) public returns(bool){
+    function transfer_contract(address tokenaddress, address to, uint value) public returns(bool){
         require(balanceOf(msg.sender)>=value,'balance too low');
 
-        balances[tokenContractaddress] = balances[tokenContractaddress] + value;
+        balances[tokenaddress] = balances[tokenaddress] + value;
         balances[msg.sender] = balances[msg.sender] - value;
-        emit Transfer(msg.sender, tokenContractaddress, value);
+        emit Transfer(msg.sender, tokenaddress, value);
+
+        IERC20 token = IERC20(tokenaddress);
+        token.transfer_save(to, value);
+
         return true;
     }
 
