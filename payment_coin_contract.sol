@@ -17,6 +17,7 @@ contract PaymentCoinContract{
     }
 
     function withdrawToken(address _tokenContract, address _to, uint256 _amount) external {
+        require(msg.sender==admin,'allow only admin');
         IERC20 tokenContract = IERC20(_tokenContract);
         tokenContract.transfer(_to, _amount);
     }
