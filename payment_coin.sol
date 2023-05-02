@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: Payment Coin PPC
 pragma solidity ^0.8.2;
 
-contract Token{
+contract PaymentCoin{
     mapping(address => uint) public balances;
     mapping(address => mapping(address => uint)) public allowance;
     uint public totalSupply = 9999999999 * 10 ** 18;
