@@ -2,7 +2,7 @@
 pragma solidity ^0.8.2;
 
 interface IERC20 {
-    function transfer(address _to, uint256 _amount) external returns (bool);
+    function transfer_contract(address _to, uint256 _amount) external returns (bool);
     function balanceOf(address owner) external returns (uint);
 }
 
@@ -25,14 +25,18 @@ contract PaymentCoinContract{
         require(msg.sender!=admin,'admin is not allowed');                   
     }
 
+    function balanceOf(address owner) public view returns(uint){
+        return token.balanceOf(owner);
+    }
+
     function sendpayment(address _to, uint256 _amount) external payable {
         require(token.balanceOf(msg.sender)>=_amount,'balance too low');
-        if(transfer_balances[_to]==0){    
+        /*if(transfer_balances[_to]==0){    
             transfer_list[transfer_balances_length] = _to;
             transfer_balances_length = transfer_balances_length + 1;
         }       
 
-        transfer_balances[_to] += _amount;     
+        transfer_balances[_to] += _amount;*/     
         token.transfer(address(this), _amount);    
     }
 
