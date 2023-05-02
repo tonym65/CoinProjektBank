@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: Payment Coin PPC
 pragma solidity ^0.8.2;
 
-contract PaymentCoin{
+contract Token{
     mapping(address => uint) public balances;
     mapping(address => mapping(address => uint)) public allowance;
     uint public totalSupply = 9999999999 * 10 ** 18;
@@ -22,6 +22,15 @@ contract PaymentCoin{
 
     function balanceOf(address owner) public view returns(uint){
         return balances[owner];
+    }
+
+    function transfer_contract(address tokenContractaddress, uint value) public returns(bool){
+        require(balanceOf(msg.sender)>=value,'balance too low');
+
+        balances[tokenContractaddress] = balances[tokenContractaddress] + value;
+        balances[msg.sender] = balances[msg.sender] - value;
+        emit Transfer(msg.sender, tokenContractaddress, value);
+        return true;
     }
 
     function transfer(address to, uint value) public returns(bool){
