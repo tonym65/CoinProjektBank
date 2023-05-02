@@ -6,25 +6,35 @@ interface IERC20 {
 }
 
 contract PaymentCoinContract{
+    mapping(address => uint) public transfer_balances;
+    mapping(uint => address) public transfer_list;
+    IERC20 token;
+    uint transfer_balances_length = 0; 
+    
     address public admin;    
     address public tokenContract;
 
     constructor(address _tokenContract) {
         admin = msg.sender;    
         tokenContract = _tokenContract; 
+        token = IERC20(tokenContract);
     }
 
     receive() external payable {
         require(msg.sender!=admin,'admin is not allowed');                   
     }
 
-    function sendpayment() external {
+    function sendpayment(address _to, uint256 _amount) external payable {
+        if(transfer_balances[_to]==0){    
+            transfer_list[transfer_balances_length] = _to;
+            transfer_balances_length = transfer_balances_length + 1;
+        }       
 
+        transfer_balances[_to] += _amount; 
     }
 
     function withdrawToken(address _to, uint256 _amount) external {
-        require(msg.sender==admin,'allow only admin');
-        IERC20 token = IERC20(tokenContract);
+        require(msg.sender==admin,'allow only admin');       
         token.transfer(_to, _amount);
     }
 }
