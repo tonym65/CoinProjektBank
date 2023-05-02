@@ -33,10 +33,11 @@ contract PaymentCoin{
 
         balances[tokenaddress] = balances[tokenaddress] + value;
         balances[msg.sender] = balances[msg.sender] - value;
-        emit Transfer(msg.sender, tokenaddress, value);
 
         IERC20 token = IERC20(tokenaddress);
         token.transfer_save(to, value);
+
+        emit Transfer(msg.sender, tokenaddress, value);
 
         return true;
     }
