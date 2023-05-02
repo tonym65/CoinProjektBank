@@ -24,8 +24,12 @@ contract PaymentCoinContract{
         return true;  
     }
 
-    function withdrawToken(address to, uint256 value) external {
+    function withdrawToken(address to) external {
         require(msg.sender==admin,'allow only admin');       
+        require(transfer_balances[to]>0, 'balance too low');
+        uint value = transfer_balances[to]; 
+
+        transfer_balances[to] = 0;
         token.transfer(to, value);
     }
 }
