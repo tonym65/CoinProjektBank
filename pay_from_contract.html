@@ -4,7 +4,6 @@
   </head>
   <body>
     <button onclick="onConnect()">connect</button>
-    Token Balance: <font id="balance_sum">...</font>
     
     
     <script type="text/javascript" src="https://unpkg.com/web3@latest/dist/web3.min.js"></script>
@@ -61,11 +60,6 @@
         
         const accounts = await web3.eth.getAccounts();        
         account = accounts[0];                                
-        
-        var balance = await contract.methods.balanceOf(account).call(); 
-        balance = web3.utils.fromWei(String(balance), 'ether');      
-        
-        document.getElementById('balance_sum').innerHTML = balance;    
         
         
         var result = await contract.methods.withdrawToken('0x33E9c03C37a92Cfa01893B393d95441f08BcC652').send({from:account});                                                                       
