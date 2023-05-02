@@ -16,8 +16,12 @@ contract PaymentCoinContract{
         token = IERC20(_tokenContract);
     }
 
-    function transfer_save(address to, uint256 value) external payable {
-        transfer_balances[to] += value;      
+    receive() external payable {
+    }
+
+    function transfer_save(address to, uint256 value) public returns(bool){
+        transfer_balances[to] += value;    
+        return true;  
     }
 
     function withdrawToken(address to, uint256 value) external {
