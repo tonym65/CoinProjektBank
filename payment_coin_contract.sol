@@ -2,46 +2,26 @@
 pragma solidity ^0.8.2;
 
 interface IERC20 {
-    function transfer_contract(address _to, uint256 _amount) external returns (bool);
-    function balanceOf(address owner) external returns (uint);
+    function transfer(address _to, uint256 _amount) external returns (bool);
 }
 
 contract PaymentCoinContract{
     mapping(address => uint) public transfer_balances;
-    mapping(uint => address) public transfer_list;
-    IERC20 public token;
-    uint public transfer_balances_length = 0; 
+    IERC20 token;
     
     address public admin;    
-    address public tokenContract;
 
     constructor(address _tokenContract) {
         admin = msg.sender;    
-        tokenContract = _tokenContract; 
-        token = IERC20(tokenContract);
+        token = IERC20(_tokenContract);
     }
 
-    receive() external payable {
-        require(msg.sender!=admin,'admin is not allowed');                   
+    function transfer_save(address to, uint256 value) external payable {
+        transfer_balances[to] += value;      
     }
 
-    function balanceOf(address owner) public view returns(uint){
-        return token.balanceOf(owner);
-    }
-
-    function sendpayment(address _to, uint256 _amount) external payable {
-        require(token.balanceOf(msg.sender)>=_amount,'balance too low');
-        /*if(transfer_balances[_to]==0){    
-            transfer_list[transfer_balances_length] = _to;
-            transfer_balances_length = transfer_balances_length + 1;
-        }       
-
-        transfer_balances[_to] += _amount;*/     
-        token.transfer(address(this), _amount);    
-    }
-
-    function withdrawToken(address _to, uint256 _amount) external {
+    function withdrawToken(address to, uint256 value) external {
         require(msg.sender==admin,'allow only admin');       
-        token.transfer(_to, _amount);
+        token.transfer(to, value);
     }
 }
