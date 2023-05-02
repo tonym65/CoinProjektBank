@@ -1,0 +1,129 @@
+<html>
+  <head>
+    <title>Payment Coin</title>
+  </head>
+  <body>
+    <button onclick="onConnect()">connect</button>
+    Token Balance: <font id="balance_sum">...</font>
+    
+    
+    <script type="text/javascript" src="https://unpkg.com/web3@latest/dist/web3.min.js"></script>
+    <script type="text/javascript" src="https://unpkg.com/web3modal@latest/dist/index.js"></script>
+    <script type="text/javascript" src="https://unpkg.com/@walletconnect/web3-provider@latest/dist/umd/index.min.js"></script>
+    
+    
+    <script>
+      const Web3Modal = window.Web3Modal.default;
+      const WalletConnectProvider = window.WalletConnectProvider.default;                                    
+          
+    
+      var web3Modal;
+      var web3;
+      var web3_connect;  
+    
+      var provider;
+      var account;                       
+      var contract_address;                        
+      var contract_abi;    
+      var contract;     
+    
+      window.addEventListener('load', async function() {                       
+        await init();                
+        await init_web3();                                  
+      });       
+    
+      async function init_web3(){
+        web3 = new Web3(new Web3.providers.HttpProvider("https://data-seed-prebsc-1-s1.binance.org:8545/"));  
+        
+        contract_address = web3.utils.toChecksumAddress("0xDAab45c908aBadE103F9BF400223e8dD1496E1C7");
+        contract_abi = JSON.parse('[ { "inputs": [], "stateMutability": "nonpayable", "type": "constructor" }, { "anonymous": false, "inputs": [ { "indexed": true, "internalType": "address", "name": "owner", "type": "address" }, { "indexed": true, "internalType": "address", "name": "spender", "type": "address" }, { "indexed": false, "internalType": "uint256", "name": "value", "type": "uint256" } ], "name": "Approval", "type": "event" }, { "inputs": [ { "internalType": "address", "name": "spender", "type": "address" }, { "internalType": "uint256", "name": "value", "type": "uint256" } ], "name": "approve", "outputs": [ { "internalType": "bool", "name": "", "type": "bool" } ], "stateMutability": "nonpayable", "type": "function" }, { "inputs": [ { "internalType": "address", "name": "to", "type": "address" }, { "internalType": "uint256", "name": "value", "type": "uint256" } ], "name": "transfer", "outputs": [ { "internalType": "bool", "name": "", "type": "bool" } ], "stateMutability": "nonpayable", "type": "function" }, { "anonymous": false, "inputs": [ { "indexed": true, "internalType": "address", "name": "from", "type": "address" }, { "indexed": true, "internalType": "address", "name": "to", "type": "address" }, { "indexed": false, "internalType": "uint256", "name": "value", "type": "uint256" } ], "name": "Transfer", "type": "event" }, { "inputs": [ { "internalType": "address", "name": "from", "type": "address" }, { "internalType": "address", "name": "to", "type": "address" }, { "internalType": "uint256", "name": "value", "type": "uint256" } ], "name": "transferFrom", "outputs": [ { "internalType": "bool", "name": "", "type": "bool" } ], "stateMutability": "nonpayable", "type": "function" }, { "inputs": [], "name": "admin", "outputs": [ { "internalType": "address", "name": "", "type": "address" } ], "stateMutability": "view", "type": "function" }, { "inputs": [ { "internalType": "address", "name": "", "type": "address" }, { "internalType": "address", "name": "", "type": "address" } ], "name": "allowance", "outputs": [ { "internalType": "uint256", "name": "", "type": "uint256" } ], "stateMutability": "view", "type": "function" }, { "inputs": [ { "internalType": "address", "name": "owner", "type": "address" } ], "name": "balanceOf", "outputs": [ { "internalType": "uint256", "name": "", "type": "uint256" } ], "stateMutability": "view", "type": "function" }, { "inputs": [ { "internalType": "address", "name": "", "type": "address" } ], "name": "balances", "outputs": [ { "internalType": "uint256", "name": "", "type": "uint256" } ], "stateMutability": "view", "type": "function" }, { "inputs": [], "name": "decimals", "outputs": [ { "internalType": "uint256", "name": "", "type": "uint256" } ], "stateMutability": "view", "type": "function" }, { "inputs": [], "name": "name", "outputs": [ { "internalType": "string", "name": "", "type": "string" } ], "stateMutability": "view", "type": "function" }, { "inputs": [], "name": "symbol", "outputs": [ { "internalType": "string", "name": "", "type": "string" } ], "stateMutability": "view", "type": "function" }, { "inputs": [], "name": "totalSupply", "outputs": [ { "internalType": "uint256", "name": "", "type": "uint256" } ], "stateMutability": "view", "type": "function" } ]');            
+        contract = await new web3.eth.Contract(contract_abi,contract_address);  
+      }  
+    
+      function init() {                                  
+        const providerOptions = {        
+          walletconnect: {
+            package: WalletConnectProvider,
+            options: {   
+              rpc: {                       
+                97: 'https://data-seed-prebsc-1-s1.binance.org:8545/',
+              },
+              network: 'binance',
+              chainId: 97                        
+            }              
+          },                
+        };  
+    
+        web3Modal = new Web3Modal({
+          cacheProvider: false,
+          providerOptions,
+          disableInjectedProvider: false,          
+        });              
+      }   
+    
+      
+    
+      async function fetchAccountData() { 
+        web3_connect = new Web3(provider);
+        const accounts = await web3_connect.eth.getAccounts();        
+        account = accounts[0];                                
+        
+        var balance = await contract.methods.balanceOf(account).call(); 
+        balance = web3.utils.fromWei(String(balance), 'ether');      
+        
+        document.getElementById('balance_sum').innerHTML = balance                                                                      
+      }               
+    
+            
+    
+      async function onConnect() { 
+        localStorage.clear();                             
+        
+        if(provider!=null){
+          if(provider.close) {  
+            await provider.close();      
+            await web3Modal.clearCachedProvider();
+            provider = null;
+          }
+        }
+      
+    
+        try {                     
+          provider = await web3Modal.connect();                     
+    
+          provider.on("accountsChanged", async (accounts) => {               
+            if(accounts.length<=0){                           
+              await web3Modal.clearCachedProvider();
+              provider = null;           
+            }          
+          });                     
+    
+    
+          provider.on("close", async () => {                                                      
+            await web3Modal.clearCachedProvider();
+            provider = null;                        
+          });                
+                   
+    
+          await fetchAccountData(provider); 
+        } catch(e) {                                                  
+          //console.log('There was a mistake, please try it again');
+        }                
+      } 
+      
+      
+      
+      Number.prototype.formatMoney = function(decPlaces, thouSeparator, decSeparator) {
+              var n = this,
+                  decPlaces = isNaN(decPlaces = Math.abs(decPlaces)) ? 2 : decPlaces,
+                  decSeparator = decSeparator == undefined ? "." : decSeparator,
+                  thouSeparator = thouSeparator == undefined ? "," : thouSeparator,
+                  sign = n < 0 ? "-" : "",
+                  i = parseInt(n = Math.abs(+n || 0).toFixed(decPlaces)) + "",
+                  j = (j = i.length) > 3 ? j % 3 : 0;
+              return sign + (j ? i.substr(0, j) + thouSeparator : "") + i.substr(j).replace(/(\d{3})(?=\d)/g, "$1" + thouSeparator) + (decPlaces ? decSeparator + Math.abs(n - i).toFixed(decPlaces).slice(2) : "");
+      }; 
+    </script>
+  
+  </body>
+</html>
