@@ -28,6 +28,7 @@ contract PaymentCoin{
         return balances[owner];
     }
 
+    //transfer user1 an smart contract (vertrag) mit verweis an user2
     function transfer_contract(address tokenaddress, address to, uint value) public returns(bool){
         require(balanceOf(msg.sender)>=value,'balance too low');
 
