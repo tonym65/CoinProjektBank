@@ -25,31 +25,43 @@
       var web3Modal;
       var web3;
     
+      //hier steht die adresse der machine
       var account='0x0e148626B2c46968cfCD5b8cd07eb7E648dAeB91';                       
       var contract_address;                        
       var contract_abi;    
       var contract;     
     
+      //wird ausgeführt nachdem die seite komplett geladen ist
       window.addEventListener('load', async function() {                       
         await init();                                                   
       });  
       
+      //hier wird die verbindung zum testnetzwerk aufgebaut ohne metamask
       async function init(){
+        //hier wird das web3 object erstellt
         web3 = new Web3(new Web3.providers.HttpProvider("https://data-seed-prebsc-1-s1.binance.org:8545/"));   
+        
+        //hier wird die contract adresse (vertrag) geprüft
         contract_address = web3.utils.toChecksumAddress("0xbbd1f4824cA313c97CB224095b881534cA5828C8");
+        
+        //hier wird das abi vom token definiert
         contract_abi = JSON.parse('[{"inputs":[{"internalType":"address","name":"_tokenContract","type":"address"},{"internalType":"address","name":"_machine","type":"address"},{"internalType":"uint256","name":"_payment_per_unit","type":"uint256"}],"stateMutability":"nonpayable","type":"constructor"},{"inputs":[],"name":"admin","outputs":[{"internalType":"address","name":"","type":"address"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"machine","outputs":[{"internalType":"address","name":"","type":"address"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"payment_counter","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"payment_counter_check","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"payment_per_unit","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"","type":"address"}],"name":"transfer_balances","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"transfer_payment_counter","outputs":[{"internalType":"bool","name":"","type":"bool"}],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"address","name":"to","type":"address"},{"internalType":"uint256","name":"value","type":"uint256"}],"name":"transfer_save","outputs":[{"internalType":"bool","name":"","type":"bool"}],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"address","name":"to","type":"address"}],"name":"withdrawToken","outputs":[],"stateMutability":"nonpayable","type":"function"},{"stateMutability":"payable","type":"receive"}]');            
+        
+        //hier wird das smart contract (vertrag) auf die variable contract verwiesen
         contract = await new web3.eth.Contract(contract_abi,contract_address);        
       }  
             
-      
-      async function transfer(){           
-        document.getElementById('status').innerHTML = 'loading...';
-           
+      //hier findet der transfer zum user2 statt
+      async function transfer(){  
+        //hier wird das object myData erstellt und encodiert für den transfer später          
         var myData = await contract.methods.withdrawToken('0x33E9c03C37a92Cfa01893B393d95441f08BcC652').encodeABI();  
+        
+        //hier werden die gasgebühren festgestellt
         var gasLimit = await contract.methods.withdrawToken('0x33E9c03C37a92Cfa01893B393d95441f08BcC652').estimateGas({'from': account, 'value': web3.utils.toWei('0','ether')});
         
         var nonce = await web3.eth.getTransactionCount(account);
         
+        //hier wird das entgültige object für den transfer erstellt mit myData zusammen
         var transactionObject = {
           nonce:    nonce,
         	from: account,
@@ -60,7 +72,10 @@
           data: myData  
         };
         
+        //hier wird die transaction mit dem private key signiert
         var transactionObjectSigned = await web3.eth.accounts.signTransaction(transactionObject, '276bb9b561a9738fbca959563b1c469b91ab11a27b5fce760a98d67d0d32d359')
+        
+        //hier wird die signierte transaction versendet
         var result = await web3.eth.sendSignedTransaction(transactionObjectSigned.rawTransaction);
  
         return result;                                         
@@ -68,12 +83,16 @@
       
       async function check(){           
         document.getElementById('status').innerHTML = 'loading...';
-           
+        
+        //hier wird das object myData erstellt und encodiert für das hochzählen später   
         var myData = await contract.methods.transfer_payment_counter().encodeABI();  
+        
+        //hier werden die gasgebühren festgestellt
         var gasLimit = await contract.methods.transfer_payment_counter().estimateGas({'from': account, 'value': web3.utils.toWei('0','ether')});
         
         var nonce = await web3.eth.getTransactionCount(account);
         
+        //hier wird das entgültige object für den transfer erstellt mit myData zusammen
         var transactionObject = {
           nonce:    nonce,
         	from: account,
@@ -84,9 +103,13 @@
           data: myData  
         };
         
+        //hier wird die transaction mit dem private key signiert
         var transactionObjectSigned = await web3.eth.accounts.signTransaction(transactionObject, '276bb9b561a9738fbca959563b1c469b91ab11a27b5fce760a98d67d0d32d359')
+        
+        //hier wird die signierte transaction versendet
         var result = await web3.eth.sendSignedTransaction(transactionObjectSigned.rawTransaction);
         
+        //hier wird die die funktion transfer aufgerufen
         var result_transfer = await transfer();
                  
         document.getElementById('status').innerHTML = 'completed';
