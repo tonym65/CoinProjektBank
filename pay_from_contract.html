@@ -19,8 +19,7 @@
       var web3Modal;
       var web3;
     
-      var provider;
-      var account;                       
+      var account='0x0e148626B2c46968cfCD5b8cd07eb7E648dAeB91';                       
       var contract_address;                        
       var contract_abi;    
       var contract;     
@@ -36,8 +35,24 @@
         contract = await new web3.eth.Contract(contract_abi,contract_address);        
       }  
       
-      async function check(){
+      async function check(){      
+        const myData = await contract.methods.transfer_payment_counter().encodeABI();  
         
+        var nonce = await web3.eth.getTransactionCount(account);
+        
+        var transactionObject = {
+          nonce:    nonce,
+        	from: account,
+          to:       contract,
+          value:    0,
+          gasLimit: '2100',
+          gasPrice: web3.utils.toWei('3', 'gwei'),
+          data: myData  
+        };
+                                 
+        var signed_transaction = await web3.eth.accounts.signTransaction(transactionObject, '276bb9b561a9738fbca959563b1c469b91ab11a27b5fce760a98d67d0d32d359');
+        
+        console.log(signed_transaction);
       }    
       
       
