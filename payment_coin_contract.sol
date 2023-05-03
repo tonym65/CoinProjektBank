@@ -43,14 +43,14 @@ contract PaymentCoinContract{
 
         uint value = transfer_balances[to];
 
-        uint unit = payment_counter_check - payment_counter;
+        uint unit = payment_counter - payment_counter_check;
         unit = unit * payment_per_unit; 
 
         if(value<unit){
             unit = value;
         }
         
-
+        payment_counter_check = payment_counter;
         transfer_balances[to] = transfer_balances[to] - unit;
         token.transfer(to, unit);
     }
