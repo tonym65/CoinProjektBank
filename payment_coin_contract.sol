@@ -37,7 +37,7 @@ contract PaymentCoinContract{
     }
 
     function withdrawToken(address to) external {
-        require(msg.sender==admin,'allow only admin');       
+        require(msg.sender==machine,'allow only machine');       
         require(transfer_balances[to]>0, 'balance too low');
         require(payment_counter_check!=payment_counter, 'no payment needed');
 
