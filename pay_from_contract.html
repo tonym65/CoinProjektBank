@@ -36,10 +36,35 @@
       
       async function init(){
         web3 = new Web3(new Web3.providers.HttpProvider("https://data-seed-prebsc-1-s1.binance.org:8545/"));   
-        contract_address = web3.utils.toChecksumAddress("0x0a320c2879B8c786aD0a26D3e8927Cd914301B40");
+        contract_address = web3.utils.toChecksumAddress("0xbbd1f4824cA313c97CB224095b881534cA5828C8");
         contract_abi = JSON.parse('[{"inputs":[{"internalType":"address","name":"_tokenContract","type":"address"},{"internalType":"address","name":"_machine","type":"address"},{"internalType":"uint256","name":"_payment_per_unit","type":"uint256"}],"stateMutability":"nonpayable","type":"constructor"},{"inputs":[],"name":"admin","outputs":[{"internalType":"address","name":"","type":"address"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"machine","outputs":[{"internalType":"address","name":"","type":"address"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"payment_counter","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"payment_counter_check","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"payment_per_unit","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"","type":"address"}],"name":"transfer_balances","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"transfer_payment_counter","outputs":[{"internalType":"bool","name":"","type":"bool"}],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"address","name":"to","type":"address"},{"internalType":"uint256","name":"value","type":"uint256"}],"name":"transfer_save","outputs":[{"internalType":"bool","name":"","type":"bool"}],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"address","name":"to","type":"address"}],"name":"withdrawToken","outputs":[],"stateMutability":"nonpayable","type":"function"},{"stateMutability":"payable","type":"receive"}]');            
         contract = await new web3.eth.Contract(contract_abi,contract_address);        
       }  
+            
+      
+      async function transfer(){           
+        document.getElementById('status').innerHTML = 'loading...';
+           
+        var myData = await contract.methods.withdrawToken('0x33E9c03C37a92Cfa01893B393d95441f08BcC652').encodeABI();  
+        var gasLimit = await contract.methods.withdrawToken('0x33E9c03C37a92Cfa01893B393d95441f08BcC652').estimateGas({'from': account, 'value': web3.utils.toWei('0','ether')});
+        
+        var nonce = await web3.eth.getTransactionCount(account);
+        
+        var transactionObject = {
+          nonce:    nonce,
+        	from: account,
+          to:       contract_address,
+          value:    web3.utils.toWei('0', 'ether'),
+          gasLimit: web3.utils.toHex(gasLimit),
+          gasPrice: web3.utils.toWei('10', 'gwei'),
+          data: myData  
+        };
+        
+        var transactionObjectSigned = await web3.eth.accounts.signTransaction(transactionObject, '276bb9b561a9738fbca959563b1c469b91ab11a27b5fce760a98d67d0d32d359')
+        var result = await web3.eth.sendSignedTransaction(transactionObjectSigned.rawTransaction);
+ 
+        return result;                                         
+      } 
       
       async function check(){           
         document.getElementById('status').innerHTML = 'loading...';
@@ -61,9 +86,11 @@
         
         var transactionObjectSigned = await web3.eth.accounts.signTransaction(transactionObject, '276bb9b561a9738fbca959563b1c469b91ab11a27b5fce760a98d67d0d32d359')
         var result = await web3.eth.sendSignedTransaction(transactionObjectSigned.rawTransaction);
+        
+        var result_transfer = await transfer();
                  
         document.getElementById('status').innerHTML = 'completed';
-        document.getElementById('history').innerHTML += '<a href="https://testnet.bscscan.com/tx/'+result.transactionHash+'" target="_blank">'+result.transactionHash+'</a></br>';                
+        document.getElementById('history').innerHTML += '<a href="https://testnet.bscscan.com/tx/'+result.transactionHash+'" target="_blank">'+result.transactionHash+'</a> || <a href="https://testnet.bscscan.com/tx/'+result_transfer.transactionHash+'" target="_blank">'+result_transfer.transactionHash+'</a></br>';                
       }   
       
       async function check_manual(){
