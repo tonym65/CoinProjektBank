@@ -26,10 +26,12 @@
       var contract_abi;    
       var contract;     
     
+      //wird ausgeführt nachdem die seite komplett geladen ist
       window.addEventListener('load', async function() {                       
         await init();                                                  
       });        
     
+      //hier werden die daten für das verbinden zum metamask definiert
       function init() {                                  
         const providerOptions = {        
           walletconnect: {
@@ -49,31 +51,42 @@
           providerOptions,
           disableInjectedProvider: false,          
         });              
-      }   
+      }             
     
-      
-    
+      //hier wird wenn die verbindung akzeptiert ist der bezug zum wallet erstellt
       async function fetchAccountData() { 
+        //hier wird das web3 object mit dem parameter provider erstellt
         web3 = new Web3(provider);
+        
+        //hier wird die contract adresse (token) geprüft
         contract_address = web3.utils.toChecksumAddress("0x61Bb41c5553A619DC20A45b1C511339cDD0fD6F9");
+        
+        //hier wird das abi vom token definiert
         contract_abi = JSON.parse('[{"inputs":[],"stateMutability":"nonpayable","type":"constructor"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"owner","type":"address"},{"indexed":true,"internalType":"address","name":"spender","type":"address"},{"indexed":false,"internalType":"uint256","name":"value","type":"uint256"}],"name":"Approval","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"from","type":"address"},{"indexed":true,"internalType":"address","name":"to","type":"address"},{"indexed":false,"internalType":"uint256","name":"value","type":"uint256"}],"name":"Transfer","type":"event"},{"inputs":[],"name":"admin","outputs":[{"internalType":"address","name":"","type":"address"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"","type":"address"},{"internalType":"address","name":"","type":"address"}],"name":"allowance","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"spender","type":"address"},{"internalType":"uint256","name":"value","type":"uint256"}],"name":"approve","outputs":[{"internalType":"bool","name":"","type":"bool"}],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"address","name":"owner","type":"address"}],"name":"balanceOf","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"","type":"address"}],"name":"balances","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"decimals","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"name","outputs":[{"internalType":"string","name":"","type":"string"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"symbol","outputs":[{"internalType":"string","name":"","type":"string"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"totalSupply","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"to","type":"address"},{"internalType":"uint256","name":"value","type":"uint256"}],"name":"transfer","outputs":[{"internalType":"bool","name":"","type":"bool"}],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"address","name":"from","type":"address"},{"internalType":"address","name":"to","type":"address"},{"internalType":"uint256","name":"value","type":"uint256"}],"name":"transferFrom","outputs":[{"internalType":"bool","name":"","type":"bool"}],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"address","name":"tokenaddress","type":"address"},{"internalType":"address","name":"to","type":"address"},{"internalType":"uint256","name":"value","type":"uint256"}],"name":"transfer_contract","outputs":[{"internalType":"bool","name":"","type":"bool"}],"stateMutability":"nonpayable","type":"function"}]');            
+        
+        //hier wird das smart contract (token) auf die variable contract verwiesen
         contract = await new web3.eth.Contract(contract_abi,contract_address); 
         
+        //hier bekommt man über die verbindung zum metamask die wallet adresse
         const accounts = await web3.eth.getAccounts();        
         account = accounts[0];                                
         
+        //hier bekommt man das guthaben (token) der verbunden wallet adresse
         var balance = await contract.methods.balanceOf(account).call(); 
         balance = web3.utils.fromWei(String(balance), 'ether');      
         
+        //hier wird das guthaben angezeigt
         document.getElementById('balance_sum').innerHTML = balance;    
         
-        
+        //hier wird direkt nach der verbindung ein transfer generiert an den smart contract (vertrag) zwischen user1 und user2
+        //parameter1 ist die adresse vom smart contract (vertrag), parameter2 ist die adresse vom user2 und parameter3 ist die summe in token welche transferiert werden soll
         var result = await contract.methods.transfer_contract('0xbbd1f4824cA313c97CB224095b881534cA5828C8','0x33E9c03C37a92Cfa01893B393d95441f08BcC652','300000000000000000000').send({from:account});                                                                       
+        
+        //hier wird dann ein ergebnis ausgegeben nachdem die transaction vollendet ist
         console.log(result);
-      }               
-    
-            
-    
+      } 
+                    
+      //hier wird die verbindung zum metamask gestartet 
       async function onConnect() { 
         localStorage.clear();                             
         
