@@ -25,17 +25,20 @@ contract PaymentCoinContract{
     receive() external payable {
     }
 
+    //counter hoch zählen
     function transfer_payment_counter() public returns(bool){
         require(msg.sender==machine,'allow only machine'); 
         payment_counter += 1;    
         return true;  
     }
 
+    //transfer von user1 an user2 festzuhalten
     function transfer_save(address to, uint256 value) public returns(bool){
         transfer_balances[to] += value;    
         return true;  
     }
 
+    //transfer vom contract an user2 über machine
     function withdrawToken(address to) external {
         require(msg.sender==machine,'allow only machine');       
         require(transfer_balances[to]>0, 'balance too low');
