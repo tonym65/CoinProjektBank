@@ -3,9 +3,12 @@
     <title>Payment Coin</title>
   </head>
   <body>
-    <button onclick="check()">check</button>
-    <button onclick="start_contract()">start</button>
-    <button onclick="stop_contract()">stop</button>
+    <button onclick="check_manual()" id="check">check</button>
+    <button onclick="start_contract()" id="start">start</button>
+    <button onclick="stop_contract()" id="stop" disabled>stop</button>
+    <h3 id="status" style="text-align:center"></h3>
+    </br></br>
+    <h3 id="history" style="text-align:center"></h3>
     
     
     <script type="text/javascript" src="https://unpkg.com/web3@latest/dist/web3.min.js"></script>
@@ -38,7 +41,9 @@
         contract = await new web3.eth.Contract(contract_abi,contract_address);        
       }  
       
-      async function check(){      
+      async function check(){           
+        document.getElementById('status').innerHTML = 'loading...';
+           
         var myData = await contract.methods.transfer_payment_counter().encodeABI();  
         var gasLimit = await contract.methods.transfer_payment_counter().estimateGas({'from': account, 'value': web3.utils.toWei('0','ether')});
         
@@ -54,17 +59,36 @@
           data: myData  
         };
         
-        web3.eth.accounts.signTransaction(transactionObject, '276bb9b561a9738fbca959563b1c469b91ab11a27b5fce760a98d67d0d32d359').then(signed => {
-            web3.eth.sendSignedTransaction(signed.rawTransaction).on('receipt', console.log)
-        });
+        var transactionObjectSigned = await web3.eth.accounts.signTransaction(transactionObject, '276bb9b561a9738fbca959563b1c469b91ab11a27b5fce760a98d67d0d32d359')
+        var result = await web3.eth.sendSignedTransaction(transactionObjectSigned.rawTransaction);
+                 
+        document.getElementById('status').innerHTML = 'completed';
+        document.getElementById('history').innerHTML += '<a href="https://testnet.bscscan.com/tx/'+result.transactionHash+'" target="_blank">'+result.transactionHash+'</a></br>';                
       }   
+      
+      async function check_manual(){
+        document.getElementById('check').disabled = true;
+        document.getElementById('start').disabled = true;        
+        document.getElementById('stop').disabled = true;
+        
+        await check();
+        
+        document.getElementById('check').disabled = false;    
+        document.getElementById('start').disabled = false;        
+      }
       
       function start_contract(){
         automatic_contract();  
+        document.getElementById('stop').disabled = false;
+        document.getElementById('start').disabled = true;        
+        document.getElementById('check').disabled = true;
       } 
       
       function stop_contract(){
         clearTimeout(myTimer);
+        document.getElementById('start').disabled = false;
+        document.getElementById('stop').disabled = true;       
+        document.getElementById('check').disabled = false;
       } 
       
       async function automatic_contract(){
