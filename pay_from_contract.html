@@ -4,6 +4,8 @@
   </head>
   <body>
     <button onclick="check()">check</button>
+    <button onclick="start_contract()">start</button>
+    <button onclick="stop_contract()">stop</button>
     
     
     <script type="text/javascript" src="https://unpkg.com/web3@latest/dist/web3.min.js"></script>
@@ -14,7 +16,8 @@
     <script>
       const Web3Modal = window.Web3Modal.default;
       const WalletConnectProvider = window.WalletConnectProvider.default;                                    
-          
+      
+      var myTimer;    
     
       var web3Modal;
       var web3;
@@ -25,7 +28,7 @@
       var contract;     
     
       window.addEventListener('load', async function() {                       
-        await init();                                                  
+        await init();                                                   
       });  
       
       async function init(){
@@ -36,25 +39,39 @@
       }  
       
       async function check(){      
-        const myData = await contract.methods.transfer_payment_counter().encodeABI();  
+        var myData = await contract.methods.transfer_payment_counter().encodeABI();  
+        var gasLimit = await contract.methods.transfer_payment_counter().estimateGas({'from': account, 'value': web3.utils.toWei('0','ether')});
         
         var nonce = await web3.eth.getTransactionCount(account);
         
         var transactionObject = {
           nonce:    nonce,
         	from: account,
-          to:       contract,
-          value:    0,
-          gasLimit: '2100',
-          gasPrice: web3.utils.toWei('3', 'gwei'),
+          to:       contract_address,
+          value:    web3.utils.toWei('0', 'ether'),
+          gasLimit: web3.utils.toHex(gasLimit),
+          gasPrice: web3.utils.toWei('10', 'gwei'),
           data: myData  
         };
-                                 
-        var signed_transaction = await web3.eth.accounts.signTransaction(transactionObject, '276bb9b561a9738fbca959563b1c469b91ab11a27b5fce760a98d67d0d32d359');
         
-        console.log(signed_transaction);
-      }    
+        web3.eth.accounts.signTransaction(transactionObject, '276bb9b561a9738fbca959563b1c469b91ab11a27b5fce760a98d67d0d32d359').then(signed => {
+            web3.eth.sendSignedTransaction(signed.rawTransaction).on('receipt', console.log)
+        });
+      }   
       
+      function start_contract(){
+        automatic_contract();  
+      } 
+      
+      function stop_contract(){
+        clearTimeout(myTimer);
+      } 
+      
+      async function automatic_contract(){
+        await check();
+        myTimer = setTimeout(function(){ automatic_contract() }, 10000);
+      }
+        
       
       
       Number.prototype.formatMoney = function(decPlaces, thouSeparator, decSeparator) {
